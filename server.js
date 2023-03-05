@@ -180,8 +180,9 @@ app.post("/updateDB",async function(req,res){
 
 
 
-app.get("/recommend",async function()
+app.get("/recommend",async function(req,res)
 {
+  console.log("Inside recommend!!")
   let class_names = ['short_sleeve_top', 'long_sleeve_top', 'short_sleeve_outwear', 'long_sleeve_outwear',
                   'vest', 'sling', 'shorts', 'trousers', 'skirt', 'short_sleeve_dress',
                   'long_sleeve_dress', 'vest_dress', 'sling_dress']
@@ -191,35 +192,152 @@ app.get("/recommend",async function()
   let location = "Vellore"
   let fields=["top","outwear","below","dress","cold","casual"]
   let values=[[0,1],[2,3],[6,7,8],[9,10,11,12],[1,3,7],[0,1,2,3,4,5,6,7,8]]
-  let contrasts=[]
+  let contrasts=[];
+  let c1=""
+  let c2=""
+  let a=0
+  let b=0
+  let c=0
+  let d=0;
+  let top = ""
+  let down=""
+  let ans1=""
+  let ans2=""
+  snapshot.forEach((doc)=>{
+    var allCategories=doc.data().clothes;
+    
+      let temp = allCategories[0][class_names[0]].length
+      console.log(temp);
+      let x = Math.ceil(Math.random()*temp);
+      console.log(x);
+      top=allCategories[6][class_names[6]][x]
+      console.log(top);
+      temp=allCategories[6][class_names[6]].length
+      let y =Math.ceil( Math.random()*temp)
+      down = allCategories[6][class_names[6]][y]
+      console.log(down);
+      for(var i in allCategories[6][class_names[6]][x])
+      {
+        ans1=i
+      }
+      for(var j in allCategories[6][class_names[6]][x])
+      {
+        ans2=j
+      }
+      console.log({top: ans1})
+      console.log({down:ans2})
+      res.send({top:ans1,down:ans2})
+    
+
+  })
   // for(let i=0;i<values.length();i++)
   // {
-    let row=[]
+    
     for(let j=0;j<class_names.length;j++)
     {
+
       snapshot.forEach((doc) => {
         var allCategories = doc.data().clothes;
+        // console.log(allCategories)
         for(let k=0;k<class_names.length;k++)
         {
-          for(var x in allCategories[k][class_names[k]][0])
+          let row2=[]
+          for(var x in allCategories[j][class_names[j]])
           {
-          // console.log(contrast(allCategories[j][class_names[j]][0][x].split("$"),allCategories[k][class_names[k]][0][x].split("$")));
+            let row1=[]
+              for(var y in allCategories[k][class_names[k]])
+              {
+                
+                // console.log(allCategories[j][class_names[j]]);
+                c1=allCategories[j][class_names[j]][x];
+                c2=allCategories[k][class_names[k]][y];
+                
+                for(var s in c1 )
+                {
+                  let row=[]
+                  for(var t in c2)
+                  {
+                    if(s!==undefined&&t!==undefined)
+                {
+                 
+                  var n1 = c1[s].split("$").map(function(str) {
+                    // using map() to convert array of strings to numbers
+           
+                    return parseInt(str); });
+                    var n2 = c2[t].split("$").map(function(str) {
+                      // using map() to convert array of strings to numbers
+             
+                      return parseInt(str); });
+                    // console.log(contrast(c1.split("$"),c2.split("$")));
+                    // console.log(c1[s],c2[t])
+                    row.push(contrast(n1,n2));
+                  
+                }
+                else
+                {
+                  row.push(100)
+                }
+                  
+                  }
+                row1.push([row])
+                }
+
+                row2.push([row1])
+                
+                
+              }
+              
+                
           // console.log(allCategories[k][class_names[k]][0][x].split("$"))
           }
+          contrasts.push([row2])
+        
         }
+   
 
       } )
     }
+    // console.log(contrasts[0][0][0]);
+    // console.log("Displaying Weather")
   // }
-
+    try{
   url="http://api.weatherapi.com/v1/current.json?key=c9557fcf2baa484ca60213502230403&q="+location+"&aqi=no";
   request.get(url,function(error,res){
-    console.log(res.body);
+    let r = JSON.parse(res.body)
+    let temp = parseInt(r["current"]["temp_c"])
+    let condition = r["current"]["condition"]["text"]
+    let wind = parseInt(r["current"]["wind_kph"])
+    let precip = parseInt(r["current"]["precip_mm"])
+    let cont=0
+    let sleeveless = false
+    let trousers = false
   
-  }).catch((err)=>{
-    console.log(err)
-  })
 
+    // console.log(temp,condition,wind,precip);
+    let x = Math.random() * 10;
+      for(var i in contrasts[0])
+        for( var j in i[0][0])
+          for(var k in j[0][0])
+            console.log(k);
+           
+    if(temp<25||condition==="rainy"||precip>=10||wind>=25)
+    {
+      
+
+        
+          // console.log(j);
+    }
+    else if(condition=="cloudy")
+    {}
+    
+  
+  })
+}
+catch(err)
+{
+  console.log(err);
+}
+console.log("Lets gooo")
 })
 
 
