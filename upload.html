@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Upload File</title>
+</head>
+<body>
+    <div class="main"></div>
+    
+        <div class="wrapper">
+
+       
+        <header>Upload File</header><br>
+
+
+          
+          <div style="margin-top:-1rem; margin-bottom:1.5rem;">
+            <input class="file-input" type="file"  style="margin-left:6rem;" name="file" id="files">
+            <br><br><br>
+            <div id="check">
+            <!---->
+            
+            <button type="button" id="send" style="background-color:#6990f2; margin-top:2px;font-size:large;text-align: center; border:1px solid #6990f2; padding:5px; height:40px; border-radius:8px;"><i class="fas fa-cloud-upload-alt"></i>&nbsp;&nbsp;&nbsp;Send to Patient&nbsp;&nbsp;&nbsp; </button>
+
+         </div>
+          </div>
+          <p id="uploading"></p>
+            <progress value="0" max="100" id="progress"></progress>
+          <div>
+        </div>
+        </div>
+        <div>
+        
+          </div>
+        </div>
+        <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-app.js"></script>
+
+        <!-- TODO: Add SDKs for Firebase products that you want to use -->
+        <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-storage.js"></script>
+
+        <script>
+            // Your web app's Firebase configuration
+            const firebaseConfig = {
+            apiKey: "AIzaSyDY8OellG0zqaYk5tTUQsmbK5vtsEOaxx0",
+            authDomain: "findyourfit-63819.firebaseapp.com",
+            projectId: "findyourfit-63819",
+            storageBucket: "findyourfit-63819.appspot.com",
+            messagingSenderId: "95617394772",
+            appId: "1:95617394772:web:ca6a5999b656ca3a22e5c1",
+            measurementId: "G-YB3KK4CQ3F"
+            };
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+        </script>
+
+        <script>
+            var files = [];
+            document.getElementById("files").addEventListener("change", function (e) {
+            files = e.target.files;
+            for (let i = 0; i < files.length; i++) {
+                console.log(files[i]);
+            }
+            });
+
+            document.getElementById("send").addEventListener("click", function () {
+            //checks if files are selected
+            if (files.length != 0) {
+                //Loops through all the selected files
+                for (let i = 0; i < files.length; i++) {
+                //create a storage reference
+                const storage = firebase.storage();
+                const storagRef = storage.ref();
+
+                const dirRef = storagRef.child("images");
+
+                const fileRef = dirRef.child(files[i].name);
+
+                //upload file
+                var upload = fileRef.put(files[i]);
+
+                //update progress bar
+                upload.on(
+                    "state_changed",
+
+                    function progress(snapshot) {
+                    var percentage =
+                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    document.getElementById("progress").value = percentage;
+                    },
+
+                    function error() {
+                    alert("error uploading file");
+                    },
+
+                    function complete() {
+            
+                    upload.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                        // You get your url from here
+
+                        console.log(downloadURL);
+                        var xhr = new XMLHttpRequest();
+                        xhr.open("POST", "/home", true);
+                        xhr.setRequestHeader("Content-Type", "application/json");
+                        xhr.send(
+                        JSON.stringify({
+                            docLink: downloadURL,
+                        })
+                        );
+                    document.getElementById("uploading").innerHTML += "upload success";
+                    });
+                    }
+                );
+                }
+            } else {
+                alert("No file chosen");
+            }
+            });
+
+        </script>
+</body>
+</html>
