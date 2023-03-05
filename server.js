@@ -34,6 +34,11 @@ app.listen(process.env.PORT || PORT, (error) =>{
     }
 });
 
+app.get("/",(req,res)=>
+{
+  console.log("Hello!!!!!");
+})
+
 app.get('/upload', (req,res)=>{
     res.sendFile(__dirname + '/upload.html');
 })
