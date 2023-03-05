@@ -218,7 +218,7 @@ app.get("/recommend",async function()
 })
 
 
-app.post('/upload', upload.single('upload'), (req, res) => {
+app.post('/uploadImage', upload.single('upload'), (req, res) => {
   res.send()
   })
 
